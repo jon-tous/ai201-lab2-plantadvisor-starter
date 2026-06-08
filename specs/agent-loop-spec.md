@@ -122,7 +122,8 @@ for tool_call in assistant_message.tool_calls:
 *The loop should stop when: (a) the LLM returns a response with no tool calls, OR (b) the MAX_TOOL_ROUNDS limit is reached. Describe how you will detect each condition and what you will return in each case.*
 
 ```
-[your answer here]
+Check `assistant_message.tool_calls` on each LLM response. If it is empty or falsy, the loop has reached the final assistant response and should stop.
+If the loop has iterated `MAX_TOOL_ROUNDS` times, stop immediately to avoid a runaway tool-calling loop and return the most recent assistant text response or a fallback user-readable message if the response content is empty.
 ```
 
 ---
@@ -132,7 +133,7 @@ for tool_call in assistant_message.tool_calls:
 *Once the loop exits because there are no more tool calls, how do you extract the text content from the response object? What field holds the string you should return?*
 
 ```
-[your answer here]
+The final text response is in `assistant_message.content` on the last response object returned by the API. Return that string directly, with a fallback if it is empty.
 ```
 
 ---
@@ -145,19 +146,21 @@ for tool_call in assistant_message.tool_calls:
 
 ```
 Query: "How should I care for my calathea?"
-Round 1 tool call: [tool name, args]
-Round 2 tool call: [tool name, args] (if any)
-Final response: [brief description]
+Round 1 tool call: lookup_plant({'plant_name': 'calathea'})
+Round 2 tool call: N/A
+Final response: According to the care data for your calathea, you should keep the soil consistently moist but not soggy, and use filtered, distilled, or rainwater to prevent brown edges. It prefers low to medium indirect light, and requires high humidity (50%+). The ideal temperature is between 60-80°F (15-27°C), and it's sensitive to cold drafts and temperatures below 55°F. You should fertilize your calathea monthly during the growing season with a diluted balanced fertilizer. Common issues to watch out for include brown leaf edges, leaf curling, and yellowing leaves. 
+
+Additionally, since you didn't specify a season, I'll provide general guidance: Calatheas can be fussy, so it's normal for them to require adjustment time in a new home. If you'd like more specific advice tailored to the current season, I can try to help with that as well.
 ```
 
 **What happens when you ask about a plant that isn't in the database?**
 
 ```
-[describe the behavior you observed]
+It tells me that it's not in the database, but proceeds to give me recommendations based on the LLM's training/general knowledge.
 ```
 
 **One thing about the tool call API that surprised you:**
 
 ```
-[your answer here]
+It emphasizes the fact that the conversation history context is visible to the LLM at every prompt, which makes sense since LLMs are stateless, but it's interesting to visualize this as a growing dictionary passed into every call.
 ```
